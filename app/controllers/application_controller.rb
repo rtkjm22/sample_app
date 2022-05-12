@@ -1,5 +1,4 @@
 class ApplicationController < ActionController::Base
-  def hello 
-    render html: "helloo, world"
-  end
+  # どのページからでもログイン関連のメソッドを呼べるようにする
+  include SessionsHelper
 end
