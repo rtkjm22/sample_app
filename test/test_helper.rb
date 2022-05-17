@@ -20,6 +20,10 @@ class ActiveSupport::TestCase
   def log_in_as(user)
     session[:user_id] = user.id
   end
+
+  def full_title(str) 
+    return "#{str} | Ruby on Rails Tutorial Sample App"
+  end
 end
 
 

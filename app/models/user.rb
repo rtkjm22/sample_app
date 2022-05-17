@@ -10,9 +10,12 @@ class User < ApplicationRecord
                     format: { with: VALID_EMAIL_REGEX }, 
                     uniqueness: { case_sensitive: false }
 
+  # オブジェクト生成時にパスワードの存在性を検証する
   has_secure_password
+
   validates :password,  presence: true, 
-                        length: { minimum: 6 }
+                        length: { minimum: 6 },
+                        allow_nil: true
 
   # 渡された文字列のハッシュ値を返す -> new_tokenメソッドよりランダムな文字列をハッシュ値にして返す
   def self.digest(string)

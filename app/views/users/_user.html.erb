@@ -1,0 +1,12 @@
+<li>
+  <!-- ヘルパーメソッドのgravatar_forを利用して、画像を取得する -->
+  <%= gravatar_for user, size: 50 %>
+  <!-- リンクの作成（第一引数はリンクの文字列、第二引数はリンクURL） -->
+  <%= link_to user.name, user %>
+
+  <!-- 現在のユーザーが管理者権限を持つかどうかで条件分岐 -->
+  <!-- 現在のユーザーが管理者権限を持つか？ + userが現在のユーザーではない？=> 現在のユーザーは削除出来ないようにする -->
+  <% if current_user.admin? && !current_user?(user) %>
+    | <%= link_to "delete", user, method: :delete, data: { confirm: "正気ですか？" } %>
+  <% end %> 
+</li>

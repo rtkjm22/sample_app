@@ -1,6 +1,5 @@
 class SessionsController < ApplicationController
   def new
-
   end
 
   def create
@@ -9,11 +8,16 @@ class SessionsController < ApplicationController
     if user && user.authenticate(params[:session][:password])  
       # ユーザーログイン後にユーザー情報のページにリダイレクトする
       log_in user
+
+      # remember_meチェックボックスがチェックされている(1)のとき、cookies情報を記憶する
       params[:session][:remember_me] == '1' ? remember(user) : forget(user)
-      redirect_to user
+      
+      # リクエストされていたURLにリダイレクトする（getのみ）
+      # 今回のdefaultページ->user->ユーザーのプロフィール画面
+      redirect_back_or user
     else
       # エラーメッセージを作成する
-      flash.now[:danger] = 'Invalid email/password combination'
+      flash.now[:danger] = 'メールアドレスとパスワードのどちらかが一致しません。'
       render 'new'
     end
   end
