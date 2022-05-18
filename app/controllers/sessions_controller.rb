@@ -6,15 +6,16 @@ class SessionsController < ApplicationController
     user = User.find_by(email: params[:session][:email].downcase)
     # ↓ ユーザーがデータベース上にあり、かつ認証に成功した場合にのみ
     if user && user.authenticate(params[:session][:password])  
-      # ユーザーログイン後にユーザー情報のページにリダイレクトする
-      log_in user
-
-      # remember_meチェックボックスがチェックされている(1)のとき、cookies情報を記憶する
-      params[:session][:remember_me] == '1' ? remember(user) : forget(user)
-      
-      # リクエストされていたURLにリダイレクトする（getのみ）
-      # 今回のdefaultページ->user->ユーザーのプロフィール画面
-      redirect_back_or user
+      if user.activated?
+        log_in user
+        params[:session][:remember_me] == '1' ? remember(user) : forget(user)
+        redirect_back_or user
+      else
+        message  = "Account not activated. "
+        message += "Check your email for the activation link."
+        flash[:warning] = message
+        redirect_to root_url
+      end
     else
       # エラーメッセージを作成する
       flash.now[:danger] = 'メールアドレスとパスワードのどちらかが一致しません。'
