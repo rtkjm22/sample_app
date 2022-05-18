@@ -27,6 +27,19 @@ malory:
   activated: true
   activated_at: <%= Time.zone.now %>
   
+hongo: 
+  name: Hongo Takeshi
+  email: kamen@rider.gov
+  password_digest: <%= User.digest('password') %>
+  activated: true
+  activated_at: <%= Time.zone.now %>
+
+shocker:
+  name: Shocker
+  email: akuno@soshiki.gov
+  password_digest: <%= User.digest('password') %>
+  activated: false
+  activated_at: <%= Time.zone.now %>
 
 <% 30.times do |n| %>
 user_<%= n %>:

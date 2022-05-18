@@ -3,21 +3,30 @@ class User < ApplicationRecord
   before_save   :downcase_email
   before_create :create_activation_digest
 
-  validates :name,  presence: true, 
-                    length: { maximum: 50 }
+
+  # バリデーション
+
+  validates :name,  
+    presence: true, 
+    length: { maximum: 50 }
 
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
-  validates :email, presence: true, 
-                    length: { maximum: 255 }, 
-                    format: { with: VALID_EMAIL_REGEX }, 
-                    uniqueness: { case_sensitive: false }
+  validates :email, 
+    presence: true, 
+    length: { maximum: 255 }, 
+    format: { with: VALID_EMAIL_REGEX }, 
+    uniqueness: { case_sensitive: false }
 
   # オブジェクト生成時にパスワードの存在性を検証する
   has_secure_password
+  validates :password,  
+    presence: true, 
+    length: { minimum: 6 },
+    allow_nil: true
 
-  validates :password,  presence: true, 
-                        length: { minimum: 6 },
-                        allow_nil: true
+  ######
+
+  # メソッド
 
   # 渡された文字列のハッシュ値を返す -> new_tokenメソッドよりランダムな文字列をハッシュ値にして返す
   def self.digest(string)
@@ -47,6 +56,25 @@ class User < ApplicationRecord
   # ユーザーのログイン情報を破棄する
   def forget
     update_attribute(:remember_digest, nil)
+  end
+
+  # アカウントを有効にする
+  def activate
+    # user. の記法を使用していないところに注意
+    # Userモデル内にuser変数は存在しないため
+    # update_attribute(:activated, true)
+    # update_attribute(:activated_at, Time.zone.now)
+
+    # 改良版(update_attributeと違って、モデルのコールバックやバリデーション処理がされないため注意)
+    update_columns(activated: true, activated_at: Time.zone.now)
+  end
+
+  # 有効化用のメールを送信する
+  def send_activation_email
+    # selfにすることで、@user.send_activation_emailの@userが参照されメール送信処理がされる
+    # deliver_nowメソッドによってUserMailer.account_activation(@user)がメール内容として送信される
+    # deliver_nowはメーラーの埋め込み関数
+    UserMailer.account_activation(self).deliver_now
   end
 
   private
