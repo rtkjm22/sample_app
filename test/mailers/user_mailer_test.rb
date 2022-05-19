@@ -29,12 +29,33 @@ class UserMailerTest < ActionMailer::TestCase
     assert_match CGI.escape(user.email),  mail.text_part.body.encoded
     assert_match CGI.escape(user.email),  mail.html_part.body.encoded
   end
-  # test "password_reset" do
-  #   mail = UserMailer.password_reset
-  #   assert_equal "Password reset", mail.subject
-  #   assert_equal ["to@example.org"], mail.to
-  #   assert_equal ["from@example.com"], mail.from
-  #   assert_match "Hi", mail.body.encoded
-  # end
+
+  test "password_reset" do
+    # 管理者ユーザー
+    user = users(:michael)
+
+    # リセットトークンに新しく作成したトークンを作成
+    user.reset_token = User.new_token
+
+    # メールを送信
+    mail = UserMailer.password_reset(user)
+
+    # メールタイトルが正しいものか?
+    assert_equal "Password reset", mail.subject
+
+    # 送信先のメールアドレスがユーザーのものか?
+    assert_equal [user.email], mail.to
+
+    # 送信元のメールアドレスは正しいものか?
+    assert_equal ["noreply@example.com"], mail.from
+
+    # メール内のハッシュ化済みリセットトークンは正しいものか?
+    assert_match user.reset_token, mail.text_part.body.encoded
+    assert_match user.reset_token, mail.html_part.body.encoded
+
+    # メール内のハッシュ済みメールアドレスは正しいものか?
+    assert_match CGI.escape(user.email), mail.text_part.body.encoded
+    assert_match CGI.escape(user.email), mail.html_part.body.encoded
+  end
 
 end
