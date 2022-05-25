@@ -67,18 +67,6 @@ class UsersController < ApplicationController
       params.require(:user).permit(:name, :email, :password, :password_confirmation)
     end
 
-    # ログイン済みユーザーかどうか確認
-    def logged_in_user
-      # current_userがnilであるかないか？ -> nilだった場合はログインしていない状態
-      unless logged_in?
-        # getリクエストを受け取ったときに、session変数の:forwading_urlキーにリクエストが送られたURLを格納する
-        store_location
-        
-        flash[:danger] = "ログインしてください！"
-        redirect_to  login_url
-      end
-    end
-
     # 正しいユーザーかどうか確認
     def correct_user
       @user = User.find(params[:id])
