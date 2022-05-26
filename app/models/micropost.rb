@@ -14,19 +14,23 @@ class Micropost < ApplicationRecord
     presence: { message: "は1文字以上入力してください。" },
     length: { maximum: 140 , message: "140文字以上入力しないでください。"}
 
-  validates :image, 
-    content_type: {
-      in: %w[image/jpeg image/gif image/png],
-      message: "must be a valid image format"
-    },
-    size: {
-      less_than: 5.megabytes,
-      message: "should be less than 5MB"
-    }
+  # validates :image, 
+  #   content_type: {
+  #     in: %w[image/jpeg image/gif image/png],
+  #     message: "must be a valid image format"
+  #   },
+  #   size: {
+  #     less_than: 5.megabytes,
+  #     message: "should be less than 5MB"
+  #   }
 
-  # 表示用のリサイズ済み画像を返す
+  validates :image, content_type: { in: %w[image/jpeg image/gif image/png],
+                                    message: "must be a valid image format" },
+                    size:         { less_than: 5.megabytes,
+                                    message: "should be less than 5MB" }
+
+    # 表示用のリサイズ済み画像を返す
   def display_image
-    # 500pxを超えないようにする
     image.variant(resize_to_limit: [500, 500])
   end
 
