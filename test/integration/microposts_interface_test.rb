@@ -14,6 +14,9 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
     # ページネーションがあるかどうか
     assert_select 'div.pagination'
 
+    # 画像が表示されたかどうか?
+    assert_select 'input[type=file]'
+
     # 無効なマイクロソフトを作成、送信
     assert_no_difference 'Micropost.count' do
       post microposts_path, 
@@ -32,17 +35,20 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
 
     # 有効な送信
     content = "this micropost really ties the room together"
+    image   = fixture_file_upload('test/fixtures/kitten.jpg', 'image/jpeg')
 
     # マイクロポストが増えているか?
     assert_difference 'Micropost.count', 1 do
       post microposts_path, 
         params: {
           micropost: {
-            content: content
+            content: content,
+            image: image
           }
         }
     end
 
+    assert assigns(:micropost).image.attached?
     assert_redirected_to root_path
 
     # 実際にリダイレクトされているか?
