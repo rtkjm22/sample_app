@@ -24,11 +24,18 @@ class UsersProfileTest < ActionDispatch::IntegrationTest
     end
     assert_select 'div.pagination', count: 1
 
+    # 14.2.2 演習追記
+    assert_match @user.active_relationships.count.to_s, response.body
+    assert_match @user.passive_relationships.count.to_s, response.body
 
-    # @user.micropost.count(30) do 
-    #   assert_select 'div.pagination', count: 1
-    # end
+  end
 
-
+  test "should be same follow_follower_count between response.body" do
+    log_in_as(@user)
+    get root_path
+    # フォロー数が同じ?
+    assert_match @user.active_relationships.count.to_s, response.body
+    # フォロワー数が同じ
+    assert_match @user.passive_relationships.count.to_s, response.body
   end
 end

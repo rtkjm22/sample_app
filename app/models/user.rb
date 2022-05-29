@@ -3,6 +3,23 @@ class User < ApplicationRecord
   # dependentはuserが削除されたときにpostを削除することを保証する
   has_many :microposts, dependent: :destroy
 
+  # フォローする側の情報
+  has_many :active_relationships, class_name:  "Relationship",
+                                  foreign_key: "follower_id",
+                                  dependent:   :destroy # ユーザーが削除したら、自動的に他のユーザーとの関係性を削除する
+  # following配列のもとはfollowedIDの集合である -> followedsだと不適切
+  has_many :following, through: :active_relationships, source: :followed
+
+
+  # フォローされる側の情報
+  has_many :passive_relationships,  class_name:  "Relationship",
+                                    foreign_key: "followed_id",
+                                    dependent:   :destroy
+  # followersが英語的に正しいため、sourceは削除しても良い(一応明示的に)
+  has_many :followers, through: :passive_relationships, source: :follower
+
+
+
   attr_accessor :remember_token, :activation_token, :reset_token
   before_save   :downcase_email
   before_create :create_activation_digest
@@ -108,7 +125,32 @@ class User < ApplicationRecord
 
   # 試作feedの定義
   def feed
-    Micropost.where("user_id = ?", id)
+    # フォローしているすべてのユーザーのDBに問い合わせ、投稿を取得する -> 遅い
+    # Micropost.where("user_id IN (?) OR user_id = ?", following_ids, id)
+
+    # Micropost.where("user_id IN (:following_ids) OR user_id = :user_id", following_ids: following_ids, user_id: id)
+
+    # ユーザー(id=1)がフォローしている全ユーザーと...
+    following_ids = "SELECT followed_id from relationships WHERE follower_id = :user_id"
+
+    # 自分自身のマイクロソフトを取得
+    Micropost.where("user_id IN (#{following_ids}) OR user_id = :user_id", user_id: id)
+  end
+
+  # 他ユーザーをフォローする
+  def follow(other_user)
+    following << other_user
+  end
+
+  # 他ユーザーをフォロー解除する
+  def unfollow(other_user) 
+    active_relationships.find_by(followed_id: other_user.id).destroy
+  end
+
+
+  def following?(other_user)
+    # following -> followedの別名
+    following.include?(other_user)
   end
 
   private

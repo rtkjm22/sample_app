@@ -131,7 +131,16 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
   end
 
-  # 管理者権限を持つユーザーがdestroyをリクエストしたとき
-  
+  # フォローしているユーザープロフィールに移動
+  test "should redirect following when not logged in" do
+    get following_user_path(@user)
+    assert_redirected_to login_url
+  end
+
+  # 自分のプロフィールに移動
+  test "should redirect followers when not logged in" do
+    get followers_user_path(@user)
+    assert_redirected_to login_url
+  end
 
 end
