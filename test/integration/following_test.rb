@@ -63,4 +63,13 @@ class FollowingTest < ActionDispatch::IntegrationTest
       delete relationship_path(relationship), xhr: true
     end
   end
+
+  # ホームページの1ページ目のフィードに対して
+  test "feed on Home page" do
+    get root_path
+    @user.feed.paginate(page: 1).each do |micropost|
+      # railsで特殊文字(<,>,\n等)を扱うためにエスケープをしておきたい -> escapeHTMLをする
+      assert_match CGI.escapeHTML(micropost.content), response.body
+    end
+  end
 end

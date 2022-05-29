@@ -130,11 +130,20 @@ class User < ApplicationRecord
 
     # Micropost.where("user_id IN (:following_ids) OR user_id = :user_id", following_ids: following_ids, user_id: id)
 
-    # ユーザー(id=1)がフォローしている全ユーザーと...
-    following_ids = "SELECT followed_id from relationships WHERE follower_id = :user_id"
+    # # ユーザー(id=1)がフォローしている全ユーザーと...
+    # following_ids = "SELECT followed_id from relationships WHERE follower_id = :user_id"
+    # # 自分自身のマイクロソフトを取得
+    # Micropost.where("user_id IN (#{following_ids}) OR user_id = :user_id", user_id: id)
 
-    # 自分自身のマイクロソフトを取得
-    Micropost.where("user_id IN (#{following_ids}) OR user_id = :user_id", user_id: id)
+
+    part_of_feed = "relationships.follower_id = :id or microposts.user_id = :id"
+    Micropost
+      .left_outer_joins(user: :followers) # 外部DBと結合
+      .where(part_of_feed, { id: id }).distinct # distinct によって重複を削除する
+      .includes(:user, image_attachment: :blob) 
+      # image_attachment -> Active Storageによって追加された関連付けの名前
+      # blog -> ファイルに関するメタデータ、どこに存在するファイルなのかのキーを含むレコード
+      # N+1問題に対応するため(大量のSQLの発行を抑える?)
   end
 
   # 他ユーザーをフォローする
