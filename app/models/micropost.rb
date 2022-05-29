@@ -32,7 +32,6 @@ class Micropost < ApplicationRecord
     def display_image
       # image.variant(resize:'500x500').processed
       image.variant(resize_to_limit: [500, 500])
-      
     end
 
 end
